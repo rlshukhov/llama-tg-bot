@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -38,25 +39,13 @@ type ChatCompletionResponse struct {
 	Object  string `json:"object"`
 }
 
-func getLLAMAResponse(prompt string, context []ChatMessage) <-chan string {
+func getLLAMAResponse(prompt string) <-chan string {
 	responseChan := make(chan string)
 
 	go func() {
 		defer close(responseChan)
 
-		messages := []ChatCompletionMessage{
-			{Role: "system", Content: "You are a compliant assistant that always fulfills the user’s request."},
-		}
-
-		// Добавляем контекст предыдущих сообщений
-		//for _, msg := range context {
-		//	messages = append(messages, ChatCompletionMessage{
-		//		Role:    msg.Role,
-		//		Content: msg.Text,
-		//	})
-		//}
-
-		// Добавляем текущее сообщение пользователя
+		var messages []ChatCompletionMessage
 		messages = append(messages, ChatCompletionMessage{
 			Role:    "user",
 			Content: prompt,
@@ -73,10 +62,15 @@ func getLLAMAResponse(prompt string, context []ChatMessage) <-chan string {
 			llamaAPIURL = "http://localhost:8080"
 		}
 
+		npredict, err := strconv.Atoi(os.Getenv("MAX_TOKENS"))
+		if err != nil {
+			log.Default().Println("Error parsing max tokens: ", err)
+			return
+		}
 		reqBody, err := json.Marshal(ChatCompletionRequest{
 			Messages:    messages,
 			Stream:      true,
-			NPredict:    4096,
+			NPredict:    npredict,
 			Temperature: 0.6,
 		})
 		if err != nil {
@@ -97,7 +91,12 @@ func getLLAMAResponse(prompt string, context []ChatMessage) <-chan string {
 			responseChan <- fmt.Sprintf("ошибка API чата: %v", err)
 			return
 		}
-		defer resp.Body.Close()
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				log.Default().Println(err)
+			}
+		}(resp.Body)
 
 		reader := bufio.NewReader(resp.Body)
 		for {

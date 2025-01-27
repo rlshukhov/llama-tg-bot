@@ -11,7 +11,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Определяем новую структуру QueueItem
 type QueueItem struct {
 	Message   tgbotapi.Message
 	SentMsgID int
@@ -52,7 +51,6 @@ func main() {
 		go worker(bot, messageQueue, &wg)
 	}
 
-	// Инициализация allowedChatIDs
 	allowedChatIDs = make(map[int64]bool)
 	allowedChatIDsStr := os.Getenv("ALLOWED_CHAT_IDS")
 	if allowedChatIDsStr != "" {
@@ -68,7 +66,6 @@ func main() {
 
 	for update := range updates {
 		if update.Message != nil {
-			// Проверяем, разрешен ли этот чат
 			if !allowedChatIDs[update.Message.Chat.ID] {
 				log.Printf("Игнорирование сообщения из неразрешенного чата: %d", update.Message.Chat.ID)
 				continue
@@ -78,7 +75,6 @@ func main() {
 				continue
 			}
 
-			// Отправляем "queued" сразу после получения сообщения
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "queued")
 			reply.ReplyToMessageID = update.Message.MessageID // Добавляем эту строку
 			sentMsg, err := bot.Send(reply)
@@ -87,13 +83,11 @@ func main() {
 				continue
 			}
 
-			// Создаем новую структуру, содержащую оригинальное сообщение и ID отправленного сообщения
 			queueItem := QueueItem{
 				Message:   *update.Message,
 				SentMsgID: sentMsg.MessageID,
 			}
 
-			// Отправляем структуру в очередь
 			messageQueue <- queueItem
 		}
 	}
