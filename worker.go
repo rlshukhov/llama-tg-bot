@@ -39,10 +39,14 @@ func processMessage(bot *tgbotapi.BotAPI, msg tgbotapi.Message, sentMsgID int) {
 	var fullResponse string
 	lastUpdate := time.Now()
 
+	formatR1 := func(s string) string {
+		return strings.ReplaceAll(strings.ReplaceAll(s, "<think>\n", "<blockquote>"), "</think>", "</blockquote>")
+	}
+
 	for chunk := range responseChan {
 		fullResponse += chunk
 		if time.Since(lastUpdate) >= time.Second*5 {
-			edit := tgbotapi.NewEditMessageText(msg.Chat.ID, sentMsgID, fullResponse+"\n\ngenerating...")
+			edit := tgbotapi.NewEditMessageText(msg.Chat.ID, sentMsgID, formatR1(fullResponse)+"\n\ngenerating...")
 			edit.ParseMode = tgbotapi.ModeMarkdown
 			_, err := bot.Send(edit)
 			if err != nil {
@@ -52,13 +56,13 @@ func processMessage(bot *tgbotapi.BotAPI, msg tgbotapi.Message, sentMsgID int) {
 		}
 	}
 
-	edit := tgbotapi.NewEditMessageText(msg.Chat.ID, sentMsgID, fullResponse)
-	edit.ParseMode = tgbotapi.ModeMarkdown
+	edit := tgbotapi.NewEditMessageText(msg.Chat.ID, sentMsgID, formatR1(fullResponse))
+	edit.ParseMode = tgbotapi.ModeHTML
 	_, err := bot.Send(edit)
 	if err != nil {
 		log.Println("Ошибка обновления сообщения", err)
 	}
 
 	addMessageToContext(msg.Chat.ID, preparedMessage, "user")
-	addMessageToContext(msg.Chat.ID, fullResponse, "assistant")
+	addMessageToContext(msg.Chat.ID, formatR1(fullResponse), "assistant")
 }
