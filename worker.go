@@ -47,7 +47,7 @@ func processMessage(bot *tgbotapi.BotAPI, msg tgbotapi.Message, sentMsgID int) {
 		fullResponse += chunk
 		if time.Since(lastUpdate) >= time.Second*5 {
 			edit := tgbotapi.NewEditMessageText(msg.Chat.ID, sentMsgID, formatR1(fullResponse)+"\n\ngenerating...")
-			edit.ParseMode = tgbotapi.ModeMarkdown
+			edit.ParseMode = tgbotapi.ModeHTML
 			_, err := bot.Send(edit)
 			if err != nil {
 				log.Println("Ошибка обновления сообщения", err)
