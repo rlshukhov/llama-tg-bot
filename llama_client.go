@@ -21,7 +21,7 @@ type ChatCompletionRequest struct {
 	Messages    []ChatCompletionMessage `json:"messages"`
 	Stream      bool                    `json:"stream"`
 	NPredict    int                     `json:"n_predict"`
-	Temperature string                  `json:"temperature"`
+	Temperature float64                 `json:"temperature"`
 }
 
 type ChatCompletionResponse struct {
@@ -76,8 +76,8 @@ func getLLAMAResponse(prompt string, context []ChatMessage) <-chan string {
 		reqBody, err := json.Marshal(ChatCompletionRequest{
 			Messages:    messages,
 			Stream:      true,
-			NPredict:    512,
-			Temperature: "0.4",
+			NPredict:    4096,
+			Temperature: 0.6,
 		})
 		if err != nil {
 			responseChan <- fmt.Sprintf("ошибка создания запроса: %v", err)
