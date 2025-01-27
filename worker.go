@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/microcosm-cc/bluemonday"
 	"log"
 	"strings"
 	"sync"
@@ -22,7 +23,14 @@ func mdToHTML(md string) string {
 	renderer := html.NewRenderer(opts)
 
 	doc := p.Parse([]byte(md))
-	return strings.ReplaceAll(strings.ReplaceAll(string(markdown.Render(doc, renderer)), "<p>", ""), "</p>", "")
+	h := string(markdown.Render(doc, renderer))
+
+	policy := bluemonday.NewPolicy()
+	policy.AllowAttrs("expandable").OnElements("blockquote")
+	policy.AllowAttrs("href").OnElements("a")
+	policy.AllowElements("b", "strong", "i", "em", "code", "s", "strike", "del", "u", "pre")
+
+	return policy.Sanitize(h)
 }
 
 func worker(bot *tgbotapi.BotAPI, messageQueue <-chan QueueItem, wg *sync.WaitGroup) {
