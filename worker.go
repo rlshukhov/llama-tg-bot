@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -32,7 +33,8 @@ func worker(bot *tgbotapi.BotAPI, messageQueue <-chan QueueItem, wg *sync.WaitGr
 func processMessage(bot *tgbotapi.BotAPI, msg tgbotapi.Message, sentMsgID int) {
 	context := getContextForChat(msg.Chat.ID)
 
-	responseChan := getLLAMAResponse(msg.Text, context)
+	preparedMessage := strings.TrimSpace(strings.ReplaceAll(msg.Text, "/start@rlsaibot", ""))
+	responseChan := getLLAMAResponse(preparedMessage, context)
 
 	var fullResponse string
 	lastUpdate := time.Now()
@@ -57,6 +59,6 @@ func processMessage(bot *tgbotapi.BotAPI, msg tgbotapi.Message, sentMsgID int) {
 		log.Println("Ошибка обновления сообщения", err)
 	}
 
-	addMessageToContext(msg.Chat.ID, msg.Text, "user")
+	addMessageToContext(msg.Chat.ID, preparedMessage, "user")
 	addMessageToContext(msg.Chat.ID, fullResponse, "assistant")
 }

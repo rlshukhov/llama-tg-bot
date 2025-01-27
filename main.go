@@ -74,6 +74,10 @@ func main() {
 				continue
 			}
 
+			if !update.FromChat().IsPrivate() && !update.Message.IsCommand() {
+				continue
+			}
+
 			// Отправляем "queued" сразу после получения сообщения
 			reply := tgbotapi.NewMessage(update.Message.Chat.ID, "queued")
 			reply.ReplyToMessageID = update.Message.MessageID // Добавляем эту строку
