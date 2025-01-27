@@ -48,7 +48,7 @@ func getLLAMAResponse(prompt string) <-chan string {
 		var messages []ChatCompletionMessage
 		messages = append(messages, ChatCompletionMessage{
 			Role:    "user",
-			Content: prompt,
+			Content: strings.TrimSuffix(strings.TrimSpace(prompt), ".") + ". Думай и отвечай на русском.",
 		})
 
 		token := os.Getenv("LLAMA_API_TOKEN")
