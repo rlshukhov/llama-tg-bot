@@ -44,7 +44,7 @@ func processMessage(bot *tgbotapi.BotAPI, msg tgbotapi.Message, sentMsgID int) {
 			s = s + "\n</think>"
 		}
 
-		return strings.ReplaceAll(strings.ReplaceAll(s, "<think>", "<blockquote>"), "</think>", "</blockquote>")
+		return strings.ReplaceAll(strings.ReplaceAll(s, "<think>", "<blockquote expandable>"), "</think>", "</blockquote>")
 	}
 
 	for chunk := range responseChan {
