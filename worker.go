@@ -40,7 +40,11 @@ func processMessage(bot *tgbotapi.BotAPI, msg tgbotapi.Message, sentMsgID int) {
 	lastUpdate := time.Now()
 
 	formatR1 := func(s string) string {
-		return strings.ReplaceAll(strings.ReplaceAll(s, "<think>\n", "<blockquote>"), "</think>", "</blockquote>")
+		if strings.Contains(s, "<think>") && !strings.Contains(s, "</think>") {
+			s = s + "\n</think>"
+		}
+
+		return strings.ReplaceAll(strings.ReplaceAll(s, "<think>", "<blockquote>"), "</think>", "</blockquote>")
 	}
 
 	for chunk := range responseChan {
