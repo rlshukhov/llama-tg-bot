@@ -14,7 +14,7 @@ import (
 )
 
 func mdToHTML(md string) string {
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	extensions := parser.CommonExtensions | parser.NoEmptyLineBeforeBlock
 	p := parser.NewWithExtensions(extensions)
 
 	htmlFlags := html.CommonFlags | html.HrefTargetBlank
@@ -22,7 +22,7 @@ func mdToHTML(md string) string {
 	renderer := html.NewRenderer(opts)
 
 	doc := p.Parse([]byte(md))
-	return string(markdown.Render(doc, renderer))
+	return strings.ReplaceAll(strings.ReplaceAll(string(markdown.Render(doc, renderer)), "<p>", ""), "</p>", "")
 }
 
 func worker(bot *tgbotapi.BotAPI, messageQueue <-chan QueueItem, wg *sync.WaitGroup) {
