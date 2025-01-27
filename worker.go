@@ -13,19 +13,13 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-var p *parser.Parser
-var renderer *html.Renderer
-
 func mdToHTML(md string) string {
-	if p == nil {
-		extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
-		p = parser.NewWithExtensions(extensions)
-	}
-	if renderer == nil {
-		htmlFlags := html.CommonFlags | html.HrefTargetBlank
-		opts := html.RendererOptions{Flags: htmlFlags}
-		renderer = html.NewRenderer(opts)
-	}
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	p := parser.NewWithExtensions(extensions)
+
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
+	opts := html.RendererOptions{Flags: htmlFlags}
+	renderer := html.NewRenderer(opts)
 
 	doc := p.Parse([]byte(md))
 	return string(markdown.Render(doc, renderer))
